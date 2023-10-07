@@ -26,19 +26,20 @@ app.use(cookieParser());
 app.get('/db')
 
 app.post('/register', (req, res) => {
-    const sql = "INSERT INTO USERS (`username`, `firstname`, `lastname`, `password`) VALUES (?)";
+    const sql = "INSERT INTO users (`user_name`, `first_name`, `last_name`, `password`) VALUES (?)";
     bcrypt.hash(req.body.password.toString(), salt, (err, hash) => {
         if (err) return res.json({ Error: "Error for hashing password" });
 
         const values = [
             req.body.username,
-            req.body.firstname,
-            req.body.lastname,
+            req.body.firstName,
+            req.body.lastName,
             hash
         ]
+        console.log(req.body.lastName)
 
         db.query(sql, [values], (err, result) => {
-            if (err) return res.json({Error: "Inserting Data Error In Server"});
+            if (err) return res.json({Error: err});
             return res.json({Status: "Success"});
         });
 
@@ -50,7 +51,7 @@ app.post('/register', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Running on Port: ${PORT}`)
-    db.connect()
+    // db.connect()
 
     db.query('SELECT 1 + 1 AS solution', (err, rows, fields) => {
         if (err) throw err
@@ -58,5 +59,11 @@ app.listen(PORT, () => {
         console.log('The solution is: ', rows[0].solution)
     })
 
-    db.end()
+    // db.query('SHOW TABLES;', (err, rows, fields) => {
+    //     if (err) throw err
+
+    //     console.log('The solution is: ', rows)
+    // })
+
+    
 });

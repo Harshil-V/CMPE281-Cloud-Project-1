@@ -1,7 +1,7 @@
 import { Typography } from 'antd';
 import { useState } from 'react';
 import axios from 'axios';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,6 +12,8 @@ function Register() {
     //     console.log('Received values:', values);
     // };
 
+    const navigate = useNavigate();
+
     const [values, setValues] = useState({
         username: '',
         firstName: '',
@@ -19,13 +21,14 @@ function Register() {
         password: ''
     });
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
+    const handleSubmit = (event) => {
+        event.preventDefault()
         console.log(values);
         axios.post('http://localhost:5000/register', values)
             .then(res => {
                 if (res.data.Status === "Status") {
-                    <Navigate to="/" />
+                    
+                    navigate('/')
                 } else {
                     alert("Error");
                 }
