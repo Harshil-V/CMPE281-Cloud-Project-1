@@ -5,6 +5,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
+import FileUpload from './components/Home';
 
 
 function App() {
@@ -13,7 +14,8 @@ function App() {
         <>
             <BrowserRouter>
                 <Routes>
-                    <Route path='/' element={<Login/>}></Route>
+                    <Route path='/' element={<FileUpload/>}></Route>
+                    <Route path='/login' element={<Login/>}></Route>
                     <Route path='/register' element={<Register/>}></Route>
                 </Routes>
             </BrowserRouter>

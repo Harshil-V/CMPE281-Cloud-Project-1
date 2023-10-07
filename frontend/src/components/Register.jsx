@@ -26,7 +26,7 @@ function Register() {
         console.log(values);
         axios.post('http://localhost:5000/register', values)
             .then(res => {
-                if (res.data.Status === "Status") {
+                if (res.data.Status === "Success") {
                     
                     navigate('/')
                 } else {
