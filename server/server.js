@@ -120,28 +120,47 @@ app.get('/logout', (req, res) => {
 
 // ===============================================
 app.post('/delete', async (req, res) =>  {
+    AWS.config.update({
+        accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
+        secretAccessKey: "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",
+        region: "us-east-2"
+    })
+
+    console.log(req.body.keyFile)
+    // res.json({data: req.body})
     const sql = "DELETE FROM rdscloudproject1.user_file_logs WHERE key_file = ?"
     
-    // const client = new S3Client({
-    //     accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
-    //     secretAccessKey: "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",
-    //     region: "us-east-2"
-    // });
+    // 
+    
+    const s3 = new AWS.S3();
 
-    // const input = {
-    //     Bucket: 'hw2-web-cloud-storage',
-    //     Key: req.body.key
-    // }
+    const params = {
+        Bucket: 'hw2-web-cloud-storage',
+        Key: req.body.keyFile
+    }
+
+    s3.deleteObject(params, (err, data) => {
+        if (err) {
+            throw err;
+        };
+
+        db.query(sql, [req.body.keyFile], (err, data) => {
+            if (err) return res.json({Error: `Failed to Delete:${req.body.keyFile} entry From database`})
+        })
+
+        res.send({
+            "response_code": 200,
+            "Status": "Success",
+            "response_data": data
+        })
+
+    })
 
     // const command = new DeleteBucketCommand(input);
     // const response = await client.send(command);
-    
-    // console.log(response)
 
-    db.query(sql, [req.body.key], (err, data) => {
-        if (err) return res.json({Error: `Failed to Delete:${req.body.key} entry From database`})
-        return res.json({ Status: "Success", data: data });
-    })
+
+    
 })
 
 app.post('/upload', async (req, res) => {
@@ -176,6 +195,7 @@ app.post('/upload', async (req, res) => {
         Key: req.files.file.name,
         Body: fileContent
     }
+    
 
     s3.upload(params, (err, data) => {
         if (err) {
