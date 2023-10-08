@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-// import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
 import mysql from 'mysql';
@@ -20,7 +20,13 @@ const db = mysql.createConnection({
 
 
 app.use(express.json());
-app.use(cors());
+
+app.use(cors({
+    origin: ["http://localhost:5173"],
+    methods: ["POST", "GET"],
+    credentials: true
+}));
+
 app.use(cookieParser());
 
 // app.post('/upload', async (req, res) => {
@@ -28,7 +34,25 @@ app.use(cookieParser());
 //     console.log(fileContent)
 //     console.log(req.data)
 // });
+const verifyUser = (req, res, next)  => {
+    const token = req.cookies.token;
+    if (!token) {
+        return res.json({Error: "You are not Authenticated"})
+    } else {
+        jwt.verify(token, "jwt-secret-token", (err, decoded) => {
+            if (err) {
+                return res.json({Error: "Token is Not Ok"});
+            } else {
+                req.name = decoded.name;
+                next()
+            }
+        })
+    }
+}
 
+app.get('/', verifyUser, (req, res) => {
+   return res.json({Status: "Success", name: req.name})
+})
 
 
 app.post('/register', (req, res) => {
@@ -67,6 +91,11 @@ app.post('/login', (req, res) => {
             bcrypt.compare(req.body.password.toString(), data[0].password, function(err, response) {
                 if (err) return res.json({Error: "Password Compare Error"});
                 if (response) {
+                    console.log(data[0].user_name)
+                    const id = data[0].id;
+                    const name = data[0].user_name;
+                    const token = jwt.sign({name, id}, "jwt-secret-token", {expiresIn: '1d'});
+                    res.cookie('token', token)
                     return res.json({Status: "Success"});
                 } else {
                     return res.json({Error: "Password not matched"});
