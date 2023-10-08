@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import FileUpload from './components/Home';
 import DeleteFile from './components/Delete';
+import DownloadFile from './components/Download';
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
                     <Route path='/login' element={<Login/>}></Route>
                     <Route path='/register' element={<Register/>}></Route>
                     <Route path='/delete' element={<DeleteFile/>}></Route>
+                    <Route path='/download' element={<DownloadFile/>}></Route>
                 </Routes>
             </BrowserRouter>
         </>

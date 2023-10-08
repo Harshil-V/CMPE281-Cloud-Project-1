@@ -163,6 +163,11 @@ app.post('/delete', async (req, res) =>  {
     
 })
 
+app.get('/download/:keyFile', (req, res) =>  {
+    const url = `dt294z2w0zv2t.cloudfront.net/${req.params.keyFile}`
+    res.json({Status: "Success", url: url})
+})
+
 app.post('/upload', async (req, res) => {
     AWS.config.update({
         accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
