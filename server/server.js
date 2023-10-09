@@ -1,4 +1,4 @@
-import express, { response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import mysql from 'mysql';
 import fileUpload from 'express-fileupload';
 import AWS from 'aws-sdk';
-import { S3Client, DeleteBucketCommand } from '@aws-sdk/client-s3';
 
 const PORT = 5000;
 const salt = 10;
@@ -20,7 +19,6 @@ const db = mysql.createConnection({
     database: "rdscloudproject1"
 })
 
-
 app.use(express.json());
 app.use(fileUpload());
 app.use(cors({
@@ -31,13 +29,12 @@ app.use(cors({
 
 app.use(cookieParser());
 
-
-
 // app.post('/upload', async (req, res) => {
 //     const fileContent = Buffer.from(req.file.data.image, 'binary');
 //     console.log(fileContent)
 //     console.log(req.data)
 // });
+
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
@@ -56,7 +53,7 @@ const verifyUser = (req, res, next) => {
 }
 
 app.get('/', verifyUser, (req, res) => {
-    return res.json({ Status: "Success", name: req.name , id: req.id})
+    return res.json({ Status: "Success", name: req.name, id: req.id })
 })
 
 
@@ -114,12 +111,12 @@ app.post('/login', (req, res) => {
 
 app.get('/logout', (req, res) => {
     res.clearCookie('token');
-    return res.json({Status: "Success"});
+    return res.json({ Status: "Success" });
 })
 
 
 // ===============================================
-app.post('/delete', async (req, res) =>  {
+app.post('/delete', async (req, res) => {
     AWS.config.update({
         accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
         secretAccessKey: "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",
@@ -129,9 +126,9 @@ app.post('/delete', async (req, res) =>  {
     console.log(req.body.keyFile)
     // res.json({data: req.body})
     const sql = "DELETE FROM rdscloudproject1.user_file_logs WHERE key_file = ?"
-    
+
     // 
-    
+
     const s3 = new AWS.S3();
 
     const params = {
@@ -145,7 +142,7 @@ app.post('/delete', async (req, res) =>  {
         };
 
         db.query(sql, [req.body.keyFile], (err, data) => {
-            if (err) return res.json({Error: `Failed to Delete:${req.body.keyFile} entry From database`})
+            if (err) return res.json({ Error: `Failed to Delete:${req.body.keyFile} entry From database` })
         })
 
         res.send({
@@ -160,12 +157,12 @@ app.post('/delete', async (req, res) =>  {
     // const response = await client.send(command);
 
 
-    
+
 })
 
-app.get('/download/:keyFile', (req, res) =>  {
+app.get('/download/:keyFile', (req, res) => {
     const url = `dt294z2w0zv2t.cloudfront.net/${req.params.keyFile}`
-    res.json({Status: "Success", url: url})
+    res.json({ Status: "Success", url: url })
 })
 
 app.post('/upload', async (req, res) => {
@@ -200,7 +197,7 @@ app.post('/upload', async (req, res) => {
         Key: req.files.file.name,
         Body: fileContent
     }
-    
+
 
     s3.upload(params, (err, data) => {
         if (err) {
@@ -217,7 +214,7 @@ app.post('/upload', async (req, res) => {
             "response_data": data
         })
 
-    
+
     })
 
 })
@@ -230,16 +227,18 @@ app.post('/update', (req, res) => {
         region: "us-east-2"
     })
 
+    const sql_check_exists = `SELETE * FROM rdscloudproject1.user_file_logs WHERE key_file = ${req.files.file.name}`
+
     const sql = `UPDATE rdscloudproject1.user_file_logs SET updated_at = CURRENT_TIMESTAMP, description = '${req.body.desc}', user_id = '${req.body.userID}' WHERE key_file = '${req.files.file.name}'`;
 
-    const values = [
-        req.body.desc,
-        req.body.userID,
-        req.files.file.name,
-    ]
-    // console.log(req.files.file.name)
-    console.log(values)
-    // console.log(req.body)
+    // const values = [
+    //     req.body.desc,
+    //     req.body.userID,
+    //     req.files.file.name,
+    // ]
+    // // console.log(req.files.file.name)
+    // console.log(values)
+    // // console.log(req.body)
     // return res.json(req.body)
 
     const s3 = new AWS.S3();
@@ -250,35 +249,44 @@ app.post('/update', (req, res) => {
         Key: req.files.file.name,
         Body: fileContent
     }
-    
 
-    s3.upload(params, (err, data) => {
-        if (err) {
-            throw err;
-        };
+    db.query(sql_check_exists, (err, result) => {
+        if (err) return res.json({ Error: `Unable to Update Entry as ${req.files.file.name} does not exist` })
 
-        db.query(sql, (err, result) => {
-            if (err) return res.json({ Error: "Filed to Update Data Entry into Database" })
+        s3.upload(params, (err, data) => {
+            if (err) {
+                throw err;
+            };
+
+            db.query(sql, (err, result) => {
+                if (err) return res.json({ Error: "Failed to Update Data Entry into Database" })
+            })
+            // console.log(sql)
+
+            res.send({
+                "response_code": 200,
+                "Status": "Success",
+                "response_data": data,
+            })
+
         })
-        // console.log(sql)
-
-        res.send({
-            "response_code": 200,
-            "Status": "Success",
-            "response_data": data, 
-        })
-
-        // console.log(data)
-        // if (data) {
-
-        // }
     })
+
 })
+
+app.get('/getlogs', (req, res) => {
+    const sql = 'SELECT u.id, u.user_name, u.first_name, u.last_name, o.key_file, o.created_at, o.updated_at, o.description FROM rdscloudproject1.user_file_logs o JOIN rdscloudproject1.users u ON u.id = o.user_id;';
+
+    db.query(sql, (err, result) => {
+        if (err) return res.json({ Error: "Failed to GET data from Database" });
+        return res.json({ Status: "Success", data: result })
+    })
+});
 
 
 app.listen(PORT, () => {
     console.log(`Running on Port: ${PORT}`)
-    console.log(new Date().toLocaleDateString())
+    console.log(new Date())
     // bcrypt.hash('admin', 10, function(err, hash) {
     //     if (err) { throw (err); }
     //     console.log(hash)

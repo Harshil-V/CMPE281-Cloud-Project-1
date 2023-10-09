@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import NavigationBar from './Navbar';
 
 
 const DeleteFile = () => {
@@ -53,26 +54,18 @@ const DeleteFile = () => {
             .then(err => console.log(err))
     }, [])
 
-    const handleDelete = () => {
-        axios.get("https://localhost:5000/logout")
-        .then(() => {
-            location.reload(true);
-        })
-        .catch(err => console.log(err));
-    }
 
     return (
         <>
             {
                 auth ?
                     <div>
-                        <div style={{ display: 'flex' }}>
+                        <NavigationBar userName={name} userID={id} />
+                        {/* <div style={{ display: 'flex' }}>
                             <h1>Logged In as: {name} - {id}</h1>
-                            <Button className='btn btn-danger \' onClick={handleDelete}>
-                                Logout
-                            </Button>
+                           
 
-                        </div>
+                        </div> */}
 
 
                         <div className="container mt-5">

@@ -9,6 +9,7 @@ import FileUpload from './components/Upload';
 import DeleteFile from './components/Delete';
 import DownloadFile from './components/Download';
 import UpdateFile from './components/Update';
+import AdminPage from './components/Admin';
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path='/' element={<FileUpload/>}></Route>
+                    <Route path='/admin' element={<AdminPage/>}></Route>
                     <Route path='/upload' element={<FileUpload/>}></Route>
                     <Route path='/login' element={<Login/>}></Route>
                     <Route path='/register' element={<Register/>}></Route>
