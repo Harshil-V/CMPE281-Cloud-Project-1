@@ -31,6 +31,7 @@ const FileUpload = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            alert(`Upload successful`)
             console.log('Upload successful:', response.data);
         } catch (error) {
             console.error('Upload error:', error);

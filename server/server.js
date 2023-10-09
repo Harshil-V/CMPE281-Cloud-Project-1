@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { response } from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -180,8 +180,8 @@ app.post('/upload', async (req, res) => {
     const values = [
         req.body.userID,
         req.files.file.name,
-        req.body.currentDateTime, //Created
-        req.body.currentDateTime, //Updated
+        new Date(), //Created
+        new Date(), //Updated
         req.body.desc
     ]
     console.log(req.files.file.name)
@@ -217,12 +217,62 @@ app.post('/upload', async (req, res) => {
             "response_data": data
         })
 
+    
+    })
+
+})
+
+
+app.post('/update', (req, res) => {
+    AWS.config.update({
+        accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
+        secretAccessKey: "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",
+        region: "us-east-2"
+    })
+
+    const sql = `UPDATE rdscloudproject1.user_file_logs SET updated_at = CURRENT_TIMESTAMP, description = '${req.body.desc}', user_id = '${req.body.userID}' WHERE key_file = '${req.files.file.name}'`;
+
+    const values = [
+        req.body.desc,
+        req.body.userID,
+        req.files.file.name,
+    ]
+    // console.log(req.files.file.name)
+    console.log(values)
+    // console.log(req.body)
+    // return res.json(req.body)
+
+    const s3 = new AWS.S3();
+
+    const fileContent = Buffer.from(req.files.file.data, 'binary');
+    const params = {
+        Bucket: 'hw2-web-cloud-storage',
+        Key: req.files.file.name,
+        Body: fileContent
+    }
+    
+
+    s3.upload(params, (err, data) => {
+        if (err) {
+            throw err;
+        };
+
+        db.query(sql, (err, result) => {
+            if (err) return res.json({ Error: "Filed to Update Data Entry into Database" })
+        })
+        // console.log(sql)
+
+        res.send({
+            "response_code": 200,
+            "Status": "Success",
+            "response_data": data, 
+        })
+
         // console.log(data)
         // if (data) {
 
         // }
     })
-
 })
 
 

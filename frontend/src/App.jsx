@@ -5,9 +5,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
-import FileUpload from './components/Home';
+import FileUpload from './components/Upload';
 import DeleteFile from './components/Delete';
 import DownloadFile from './components/Download';
+import UpdateFile from './components/Update';
 
 
 function App() {
@@ -17,10 +18,12 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path='/' element={<FileUpload/>}></Route>
+                    <Route path='/upload' element={<FileUpload/>}></Route>
                     <Route path='/login' element={<Login/>}></Route>
                     <Route path='/register' element={<Register/>}></Route>
                     <Route path='/delete' element={<DeleteFile/>}></Route>
                     <Route path='/download' element={<DownloadFile/>}></Route>
+                    <Route path='/update' element={<UpdateFile/>}></Route>
                 </Routes>
             </BrowserRouter>
         </>

@@ -4,34 +4,48 @@ import { Form, Button } from 'react-bootstrap';
 
 
 const UpdateFile = () => {
+    const [file, setFile] = useState(null);
+    const [description, setDescription] = useState('');
 
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (selectedFile && selectedFile.size <= 10485760) {
+            setFile(selectedFile);
+        } else {
+            alert('File size exceeds the limit (10 MB).');
+            e.target.value = null;
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('userID', id);
+        formData.append('file', file);
+        formData.append('desc', description);
+
+        try {
+            const response = await axios.post("http://localhost:5000/update", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            alert(`Upload successful`)
+            console.log('Upload successful:', response.data);
+        } catch (error) {
+            console.error('Upload error:', error);
+        }
+
+        console.log('File:', file);
+        console.log('Description:', description);
+    };
 
     const [auth, setAuth] = useState(false);
     const [message, setMessage] = useState("")
     const [name, setName] = useState("");
     const [id, setID] = useState("");
-    const [alertMessage, setAlertMessage] = useState("");
 
-    const [values, setValues] = useState({
-        keyFile: ''
-    });
-    
     axios.defaults.withCredentials = true;
-
-    const handleSubmit = (event) => {
-        event.preventDefault()
-        console.log(values);
-        axios.post('http://localhost:5000/delete', values)
-            .then(res => {
-                if (res.data.Status === "Success") {
-                    alert("Successfully Deleted")
-                } else {
-                    console.log(res.data);
-                    alert(alertMessage);
-                }
-            })
-            .then(err => console.log(err));
-    }
 
     useEffect(() => {
         axios.get('http://localhost:5000')
@@ -47,14 +61,13 @@ const UpdateFile = () => {
                 } else {
                     setAuth(false)
                     setMessage(res.data.Error)
-                    setAlertMessage(res.data.Error)
                 }
             })
             .then(err => console.log(err))
     }, [])
 
     const handleDelete = () => {
-        axios.get("https://localhost:5000/logout")
+        axios.get("http://localhost:5000/logout")
         .then(() => {
             location.reload(true);
         })
@@ -76,22 +89,31 @@ const UpdateFile = () => {
 
 
                         <div className="container mt-5">
-                            <h2>Delete File From S3 Bucket</h2>
+                            <h2>File Update</h2>
                             <Form onSubmit={handleSubmit}>
+                                <Form.Group controlId="file">
+                                    <Form.Label>Choose a file (max 10 MB)</Form.Label>
+                                    <Form.Control
+                                        type="file"
+                                        onChange={handleFileChange}
+                                        required
+                                    />
+                                </Form.Group>
 
                                 <Form.Group className='mt-3' controlId="description">
-                                    <Form.Label>File Name / Object Key </Form.Label>
+                                    <Form.Label>Description</Form.Label>
                                     <Form.Control
-                                        type="text"
-                                        name="keyFile"
-                                        value={values.keyFile}
-                                        onChange={(e) => setValues({ ...values, keyFile: e.target.value })}
+                                        maxLength={45}
+                                        as="textarea"
+                                        rows={1}
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
                                         required
                                     />
                                 </Form.Group>
 
                                 <Button className='mt-3' variant="primary" type="submit">
-                                    Delete File/Object
+                                    Upload
                                 </Button>
                             </Form>
                         </div>
