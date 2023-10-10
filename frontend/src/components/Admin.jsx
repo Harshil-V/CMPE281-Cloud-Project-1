@@ -24,14 +24,17 @@ const AdminPage = () => {
             });
     }, []);
 
-    const handleDeleteFile = (keyFile) => {
 
-        axios.get('http://localhost:5000/delete', keyFile)
+
+    const handleDeleteFile = (keyFile) => {
+        
+        axios.post('http://localhost:5000/delete', {"keyFile": keyFile})
             .then(() => {
+                location.reload();
                 setUserData((prevData) => prevData.filter((user) => user.filename !== keyFile));
             })
             .catch((error) => {
-                console.error('Error deleting  file:', error);
+                console.error('Error deleting file:', error);
             });
     };
 

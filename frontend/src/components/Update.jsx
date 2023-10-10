@@ -30,8 +30,8 @@ const UpdateFile = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            alert(`Upload successful`)
-            console.log('Upload successful:', response.data);
+            alert(response.data.Status)
+            // console.log('Upload successful:', response.data);
         } catch (error) {
             console.error('Upload error:', error);
         }

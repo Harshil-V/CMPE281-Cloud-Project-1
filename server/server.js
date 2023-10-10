@@ -117,6 +117,7 @@ app.get('/logout', (req, res) => {
 
 // ===============================================
 app.post('/delete', async (req, res) => {
+    console.log(req.body)
     AWS.config.update({
         accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
         secretAccessKey: "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",
@@ -172,7 +173,7 @@ app.post('/upload', async (req, res) => {
         region: "us-east-2"
     })
 
-    const sql = "INSERT INTO rdscloudproject1.user_file_logs (`user_id`, `key_file`, `created_at`, `updated_at`, `desc`) VALUES (?)";
+    const sql = "INSERT INTO rdscloudproject1.user_file_logs (`user_id`, `key_file`, `created_at`, `updated_at`, `description`) VALUES (?)";
 
     const values = [
         req.body.userID,
@@ -227,7 +228,7 @@ app.post('/update', (req, res) => {
         region: "us-east-2"
     })
 
-    const sql_check_exists = `SELETE * FROM rdscloudproject1.user_file_logs WHERE key_file = ${req.files.file.name}`
+    const sql_check_exists = `SELECT * FROM rdscloudproject1.user_file_logs WHERE key_file = '${req.files.file.name}'`
 
     const sql = `UPDATE rdscloudproject1.user_file_logs SET updated_at = CURRENT_TIMESTAMP, description = '${req.body.desc}', user_id = '${req.body.userID}' WHERE key_file = '${req.files.file.name}'`;
 
@@ -249,9 +250,13 @@ app.post('/update', (req, res) => {
         Key: req.files.file.name,
         Body: fileContent
     }
-
+    console.log(sql_check_exists);
     db.query(sql_check_exists, (err, result) => {
         if (err) return res.json({ Error: `Unable to Update Entry as ${req.files.file.name} does not exist` })
+        
+        if (result.length == 0)
+            return res.json({Status: `Unable to Update Entry as ${req.files.file.name} does not exist \n Please Go An Upload A file with ${req.files.file.name} first!!!!` })
+        
 
         s3.upload(params, (err, data) => {
             if (err) {
