@@ -22,8 +22,6 @@ const db = mysql.createConnection({
 app.use(express.json());
 app.use(fileUpload());
 app.use(cors({
-    origin: ["http://localhost:5173"],
-    methods: ["POST", "GET"],
     credentials: true
 }));
 
@@ -56,6 +54,9 @@ app.get('/', verifyUser, (req, res) => {
     return res.json({ Status: "Success", name: req.name, id: req.id })
 })
 
+app.get('/test', (req, res) => {
+    res.json({Message: "Hello World!! - Cloud" })
+})
 
 app.post('/register', (req, res) => {
     const sql = "INSERT INTO users (`user_name`, `first_name`, `last_name`, `password`) VALUES (?)";
