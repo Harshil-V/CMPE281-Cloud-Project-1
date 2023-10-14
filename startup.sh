@@ -1,6 +1,4 @@
 #!/bin/bash -ex
-# output user data logs into a separate file for debugging
-exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 # Update and Upgrade
 sudo apt-get update && sudo apt-get upgrade -y
 # Download - NVM 
@@ -8,9 +6,8 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
 source ~/.bashrc
 # install node
-nvm install v18.8.1
-#export NVM dir
-nvm install lts/fermium
+nvm install v18.8.0
+
 #upgrade yum
 sudo apt remove nodejs
 

@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import mysql from 'mysql';
 import fileUpload from 'express-fileupload';
 import AWS from 'aws-sdk';
+import 'dotenv/config';
 
 const PORT = 5000;
 const salt = 10;
@@ -13,10 +14,10 @@ const salt = 10;
 const app = express();
 
 const db = mysql.createConnection({
-    host: "db-mysql-project1.cahpyfzveijy.us-west-1.rds.amazonaws.com",
-    user: "admin",
-    password: "gPQicnjQqRNy",
-    database: "rdscloudproject1"
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 })
 
 app.use(express.json());
@@ -120,9 +121,9 @@ app.get('/logout', (req, res) => {
 app.post('/delete', async (req, res) => {
     console.log(req.body)
     AWS.config.update({
-        accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
-        secretAccessKey: "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",
-        region: "us-east-2"
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION
     })
 
     console.log(req.body.keyFile)
@@ -169,9 +170,9 @@ app.get('/download/:keyFile', (req, res) => {
 
 app.post('/upload', async (req, res) => {
     AWS.config.update({
-        accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
-        secretAccessKey: "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",
-        region: "us-east-2"
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION
     })
 
     const sql = "INSERT INTO rdscloudproject1.user_file_logs (`user_id`, `key_file`, `created_at`, `updated_at`, `description`) VALUES (?)";
@@ -224,9 +225,9 @@ app.post('/upload', async (req, res) => {
 
 app.post('/update', (req, res) => {
     AWS.config.update({
-        accessKeyId: "AKIAT7DMIEQ4SJ2R34NQ",
-        secretAccessKey: "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",
-        region: "us-east-2"
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION
     })
 
     const sql_check_exists = `SELECT * FROM rdscloudproject1.user_file_logs WHERE key_file = '${req.files.file.name}'`
@@ -293,6 +294,8 @@ app.get('/getlogs', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Running on Port: ${PORT}`)
     console.log(new Date())
+
+    console.log(process.env.DB_HOST)
     // bcrypt.hash('admin', 10, function(err, hash) {
     //     if (err) { throw (err); }
     //     console.log(hash)
