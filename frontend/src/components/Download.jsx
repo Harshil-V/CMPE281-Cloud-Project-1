@@ -2,8 +2,10 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import NavigationBar from './Navbar';
+import jwt_decode from 'jwt-decode';
 
-
+const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
+// const baseURL = "http://localhost:5000";
 const DownloadFile = () => {
 
 
@@ -23,13 +25,14 @@ const DownloadFile = () => {
     const handleSubmit = (event) => {
         event.preventDefault()
         console.log(values);
-        axios.get(`http://localhost:5000/download/${values.keyFile}`)
+        axios.get(`${baseURL}/download/${values.keyFile}`)
             .then(res => {
                 if (res.data.Status === "Success") {
                     setFileURL(res.data.url)
-                   
-                    window.open("https://"+fileURL, '_blank');
-                    
+                    // console.log(res.data)
+
+                    // window.open(`https://${fileURL}`);
+
                     alert("Successfully Got File")
                 } else {
                     console.log(res.data);
@@ -40,44 +43,19 @@ const DownloadFile = () => {
     }
 
     useEffect(() => {
-        axios.get('http://localhost:5000')
-            .then(res => {
-                if (res.data.Status === 'Success') {
-                    setAuth(true)
-                    console.log(res.data.name)
-                    console.log(res.data)
-                    
+        const token = window.localStorage.token;
 
-                    setName(res.data.name)
-                    setID(res.data.id)
-                    // navigate('/login')
-                } else {
-                    setAuth(false)
-                    setMessage(res.data.Error)
-                    setAlertMessage(res.data.Error)
-                }
-            })
-            .then(err => console.log(err))
+        if (token) {
+            setAuth(true);
+            setName(jwt_decode(token).name)
+            setID(jwt_decode(token).id);
+
+        } else {
+            setAuth(false)
+            setMessage("You are not Authenticated");
+            setAlertMessage("You are not Authenticated")
+        }
     }, [])
-
-    // const handleDelete = () => {
-    //     axios.get("https://localhost:5000/logout")
-    //         .then(() => {
-    //             location.reload(true);
-    //         })
-    //         .catch(err => console.log(err));
-    // }
-
-    // const downloadFile = () => {
-    //     const externalFileUrl = fileURL; // Replace with your external file URL
-    //     const link = document.createElement('a');
-    //     link.href = externalFileUrl;
-    //     link.download = 'downloaded-file-name'; // Provide a desired name for the downloaded file
-    //     document.body.appendChild(link);
-    //     link.click();
-    //     document.body.removeChild(link);
-    // };
-
 
     return (
         <>
@@ -85,7 +63,6 @@ const DownloadFile = () => {
                 auth ?
                     <div>
                         <NavigationBar userName={name} userID={id} />
-
 
                         <div className="container mt-5">
                             <h2>Download File</h2>
@@ -95,6 +72,7 @@ const DownloadFile = () => {
                                     <Form.Label>File Name / Object Key</Form.Label>
                                     <Form.Control
                                         type="text"
+                                        placeholder='Please Enter the File Name / Key'
                                         name="keyFile"
                                         value={values.keyFile}
                                         onChange={(e) => setValues({ ...values, keyFile: e.target.value })}
@@ -102,9 +80,25 @@ const DownloadFile = () => {
                                     />
                                 </Form.Group>
 
-                                <Button className='mt-3' variant="primary" type="submit">
-                                    Request File
-                                </Button>
+
+
+                                {
+                                    fileURL ?
+                                        <>
+                                            <Button className='mt-3' variant="primary" type="submit">
+                                                Request File
+                                            </Button>
+                                            <Button style={{ marginLeft: 4 }} className='mt-3' variant="secondary" href={`https://${fileURL}`} download>
+                                                Donwload File
+                                            </Button>
+
+                                        </>
+                                        :
+                                        <Button className='mt-3' variant="primary" type="submit">
+                                            Request File
+                                        </Button>
+                                }
+
 
                             </Form>
                         </div>
@@ -112,7 +106,13 @@ const DownloadFile = () => {
 
                     <div>
 
-                        <h3>Status: {message}</h3>
+                        <center className='container mt-5'>
+                            <h3>Status: {message}</h3>
+                            <div>
+                                <Button style={{ marginRight: 6 }} href='/login'>Login</Button>
+                                <Button variant='secondary' href='/register'>Register</Button>
+                            </div>
+                        </center>
                     </div>
 
             }

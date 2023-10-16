@@ -7,6 +7,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const { Title } = Typography;
 
+const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
+
 function Register() {
     // const onFinish = (values) => {
     //     console.log('Received values:', values);
@@ -24,10 +26,10 @@ function Register() {
     const handleSubmit = (event) => {
         event.preventDefault()
         console.log(values);
-        axios.post('http://localhost:5000/register', values)
+        axios.post(`${baseURL}/register`, values)
             .then(res => {
                 if (res.data.Status === "Success") {
-                    
+
                     navigate('/')
                 } else {
                     alert("Error");
@@ -48,7 +50,7 @@ function Register() {
                             type="text"
                             name="username"
                             value={values.username}
-                            onChange={e => setValues({...values, username: e.target.value})}
+                            onChange={e => setValues({ ...values, username: e.target.value })}
                             required
                         />
                     </Form.Group>
@@ -59,7 +61,7 @@ function Register() {
                             type="text"
                             name="firstname"
                             value={values.firstName}
-                            onChange={e => setValues({...values, firstName: e.target.value})}
+                            onChange={e => setValues({ ...values, firstName: e.target.value })}
                             required
                         />
                     </Form.Group>
@@ -70,7 +72,7 @@ function Register() {
                             type="text"
                             name="lastname"
                             value={values.lastName}
-                            onChange={e => setValues({...values, lastName: e.target.value})}
+                            onChange={e => setValues({ ...values, lastName: e.target.value })}
                             required
                         />
                     </Form.Group>
@@ -81,53 +83,16 @@ function Register() {
                             type="password"
                             name="password"
                             value={values.password}
-                            onChange={e => setValues({...values, password: e.target.value})}
+                            onChange={e => setValues({ ...values, password: e.target.value })}
                             required
                         />
                     </Form.Group>
                     <center>
-                    <Button className='mt-3' variant="primary" type="submit">
-                        Register
-                    </Button>
+                        <Button className='mt-3' variant="primary" type="submit">
+                            Register
+                        </Button>
                     </center>
                 </Form>
-                {/* <Form name="register" onFinish={handleSubmit}>
-                    <Form.Item
-                        label="Username"
-                        name="username"
-                        rules={[{ required: true, message: 'Please input your Username!' }]}
-                    >
-                        <Input onChange={e => setValues({...values, username: e.target.value})}/>
-                    </Form.Item>
-                    <Form.Item
-                        label="First Name"
-                        name="firstname"
-                        rules={[{ required: true, message: 'Please input your First Name!' }]}
-                    >
-                        <Input onChange={e => setValues({...values, firstName: e.target.value})} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Last Name"
-                        name="lastname"
-                        rules={[{ required: true, message: 'Please input your Last Name!' }]}
-                    >
-                        <Input onChange={e => setValues({...values, lastName: e.target.value})} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Password"
-                        name="password"
-                        rules={[{ required: true, message: 'Please input your password!' }]}
-                    >
-                        <Input.Password onChange={e => setValues({...values, password: e.target.value})}/>
-                    </Form.Item>
-                    <Form.Item>
-                        <center>
-                            <Button type="primary" htmlType="submit">
-                                Register
-                            </Button>
-                        </center>
-                    </Form.Item>
-                </Form> */}
             </div>
         </>
     );

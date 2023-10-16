@@ -6,6 +6,7 @@ import { Form, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const { Title } = Typography;
+const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
 
 const Login = () => {
 
@@ -25,9 +26,11 @@ const Login = () => {
     const handleSubmit = (event) => {
         event.preventDefault()
         console.log(values);
-        axios.post('http://localhost:5000/login', values)
+        axios.post(`${baseURL}/login`, values)
             .then(res => {
                 if (res.data.Status === "Success") {
+                   
+                    localStorage.setItem('token', res.data.Token)
                     navigate('/')
                 } else {
                     console.log(res.data);
@@ -73,33 +76,6 @@ const Login = () => {
                     </center>
                 </Form>
 
-                {/* <Form name="login" onFinish={onFinish}>
-                   
-                    <Form.Item
-                        label="Username"
-                        name="username"
-                        rules={[{ required: true, message: 'Please input your username!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="Password"
-                        name="password"
-                        rules={[{ required: true, message: 'Please input your password!' }]}
-                    >
-                        <Input.Password />
-                    </Form.Item>
-                    <Form.Item>
-                        <center>
-                            <Button  style={{ marginRight: 15}} type="primary" htmlType="submit">
-                                Login
-                            </Button>
-                            <Button type="primary" href='/register'>
-                                Register
-                            </Button>
-                        </center>
-                    </Form.Item>
-                </Form> */}
             </div>
         </>
     );

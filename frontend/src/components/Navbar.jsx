@@ -4,8 +4,6 @@ const NavigationBar = (props) => {
     // eslint-disable-next-line react/prop-types
     const { userName, userID } = props;
 
-    
-
     return (
         <Navbar bg="dark" variant="dark" expand="lg">
             <Navbar.Brand href="/">Logged In As: {userName} - ID:{userID}</Navbar.Brand>

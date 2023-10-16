@@ -2,6 +2,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import NavigationBar from './Navbar'
+import jwt_decode from 'jwt-decode';
+
+const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
 
 const FileUpload = () => {
     const [file, setFile] = useState(null);
@@ -26,7 +29,7 @@ const FileUpload = () => {
         formData.append('desc', description);
 
         try {
-            const response = await axios.post("http://localhost:5000/upload", formData, {
+            const response = await axios.post(`${baseURL}/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -47,33 +50,37 @@ const FileUpload = () => {
     const [id, setID] = useState("");
 
     axios.defaults.withCredentials = true;
+    // function getCookie(cname) {
+    //     let name = cname + "=";
+    //     let decodedCookie = decodeURIComponent(document.cookie);
+    //     let ca = decodedCookie.split(';');
+    //     for (let i = 0; i < ca.length; i++) {
+    //         let c = ca[i];
+    //         while (c.charAt(0) == ' ') {
+    //             c = c.substring(1);
+    //         }
+    //         if (c.indexOf(name) == 0) {
+    //             return c.substring(name.length, c.length);
+    //         }
+    //     }
+    //     return "";
+    // }
 
     useEffect(() => {
-        axios.get('http://localhost:5000')
-            .then(res => {
-                if (res.data.Status === 'Success') {
-                    setAuth(true)
-                    console.log(res.data.name)
-                    console.log(res.data)
+        
+        const token = window.localStorage.token;
+        
+        if (token) {
+            setAuth(true);
+            setName(jwt_decode(token).name)
+            setID(jwt_decode(token).id);
 
-                    setName(res.data.name)
-                    setID(res.data.id)
-                    // navigate('/login')
-                } else {
-                    setAuth(false)
-                    setMessage(res.data.Error)
-                }
-            })
-            .then(err => console.log(err))
+        } else {
+            setAuth(false)
+            setMessage("You are not Authenticated")
+        }
+       
     }, [])
-
-    // const handleDelete = () => {
-    //     axios.get("https://localhost:5000/logout")
-    //     .then(() => {
-    //         location.reload(true);
-    //     })
-    //     .catch(err => console.log(err));
-    // }
 
     return (
         <>
@@ -81,15 +88,6 @@ const FileUpload = () => {
                 auth ?
                     <div>
                         <NavigationBar userName={name} userID={id} />
-
-                        {/* <div style={{ display: 'flex' }}>
-                            <h1>Logged In as: {name} - {id}</h1>
-                            <Button className='btn btn-danger \' onClick={handleDelete}>
-                                Logout
-                            </Button>
-
-                        </div> */}
-
 
                         <div className="container mt-5">
                             <h2>File Upload</h2>
@@ -123,8 +121,14 @@ const FileUpload = () => {
                     </div> :
 
                     <div>
-    
-                        <h3>Status: {message}</h3>
+
+                        <center className='container mt-5'>
+                            <h3>Status: {message}</h3>
+                            <div>
+                                <Button style={{ marginRight: 6 }} href='/login'>Login</Button>
+                                <Button variant='secondary' href='/register'>Register</Button>
+                            </div>
+                        </center>
                     </div>
 
             }

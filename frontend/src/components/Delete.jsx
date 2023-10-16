@@ -2,7 +2,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import NavigationBar from './Navbar';
+import jwt_decode from 'jwt-decode';
 
+const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
 
 const DeleteFile = () => {
 
@@ -16,13 +18,13 @@ const DeleteFile = () => {
     const [values, setValues] = useState({
         keyFile: ''
     });
-    
+
     axios.defaults.withCredentials = true;
 
     const handleSubmit = (event) => {
         event.preventDefault()
         console.log(values);
-        axios.post('http://localhost:5000/delete', values)
+        axios.post(`${baseURL}/delete`, values)
             .then(res => {
                 if (res.data.Status === "Success") {
                     alert("Successfully Deleted")
@@ -35,25 +37,19 @@ const DeleteFile = () => {
     }
 
     useEffect(() => {
-        axios.get('http://localhost:5000')
-            .then(res => {
-                if (res.data.Status === 'Success') {
-                    setAuth(true)
-                    console.log(res.data.name)
-                    console.log(res.data)
+        const token = window.localStorage.token;
 
-                    setName(res.data.name)
-                    setID(res.data.id)
-                    // navigate('/login')
-                } else {
-                    setAuth(false)
-                    setMessage(res.data.Error)
-                    setAlertMessage(res.data.Error)
-                }
-            })
-            .then(err => console.log(err))
+        if (token) {
+            setAuth(true);
+            setName(jwt_decode(token).name)
+            setID(jwt_decode(token).id);
+
+        } else {
+            setAuth(false)
+            setMessage("You are not Authenticated");
+            setAlertMessage("You are not Authenticated")
+        }
     }, [])
-
 
     return (
         <>
@@ -76,6 +72,7 @@ const DeleteFile = () => {
                                     <Form.Label>File Name / Object Key </Form.Label>
                                     <Form.Control
                                         type="text"
+                                        placeholder='Please Enter File Name / Key'
                                         name="keyFile"
                                         value={values.keyFile}
                                         onChange={(e) => setValues({ ...values, keyFile: e.target.value })}
@@ -91,8 +88,14 @@ const DeleteFile = () => {
                     </div> :
 
                     <div>
-    
-                        <h3>Status: {message}</h3>
+
+                        <center className='container mt-5'>
+                            <h3>Status: {message}</h3>
+                            <div>
+                                <Button style={{ marginRight: 6 }} href='/login'>Login</Button>
+                                <Button variant='secondary' href='/register'>Register</Button>
+                            </div>
+                        </center>
                     </div>
 
             }

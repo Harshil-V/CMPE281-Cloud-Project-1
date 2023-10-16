@@ -2,6 +2,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import NavigationBar from './Navbar';
+import jwt_decode from 'jwt-decode';
+
+const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
 
 const UpdateFile = () => {
     const [file, setFile] = useState(null);
@@ -25,7 +28,7 @@ const UpdateFile = () => {
         formData.append('desc', description);
 
         try {
-            const response = await axios.post("http://localhost:5000/update", formData, {
+            const response = await axios.post(`${baseURL}/update`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -48,22 +51,17 @@ const UpdateFile = () => {
     axios.defaults.withCredentials = true;
 
     useEffect(() => {
-        axios.get('http://localhost:5000')
-            .then(res => {
-                if (res.data.Status === 'Success') {
-                    setAuth(true)
-                    console.log(res.data.name)
-                    console.log(res.data)
+        const token = window.localStorage.token;
 
-                    setName(res.data.name)
-                    setID(res.data.id)
-                    // navigate('/login')
-                } else {
-                    setAuth(false)
-                    setMessage(res.data.Error)
-                }
-            })
-            .then(err => console.log(err))
+        if (token) {
+            setAuth(true);
+            setName(jwt_decode(token).name)
+            setID(jwt_decode(token).id);
+
+        } else {
+            setAuth(false)
+            setMessage("You are not Authenticated");
+        }
     }, [])
 
     // const handleDelete = () => {
@@ -86,7 +84,7 @@ const UpdateFile = () => {
                             <h2>File Update</h2>
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group controlId="file">
-                                    <Form.Label>Choose a file (max 10 MB)</Form.Label>
+                                    <Form.Label>Choose a file (max 10 MB) <br/> Please Make Sure File Name / Key Already Exists</Form.Label>
                                     <Form.Control
                                         type="file"
                                         onChange={handleFileChange}
@@ -114,8 +112,14 @@ const UpdateFile = () => {
                     </div> :
 
                     <div>
-    
-                        <h3>Status: {message}</h3>
+
+                        <center className='container mt-5'>
+                            <h3>Status: {message}</h3>
+                            <div>
+                                <Button style={{ marginRight: 6 }} href='/login'>Login</Button>
+                                <Button variant='secondary' href='/register'>Register</Button>
+                            </div>
+                        </center>
                     </div>
 
             }

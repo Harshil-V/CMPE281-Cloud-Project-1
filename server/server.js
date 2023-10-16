@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import mysql from 'mysql';
 import fileUpload from 'express-fileupload';
 import AWS from 'aws-sdk';
+import { S3Client, DeleteBucketCommand } from '@aws-sdk/client-s3';
 import 'dotenv/config';
 
 const PORT = 5000;
@@ -23,9 +24,10 @@ const db = mysql.createConnection({
 app.use(express.json());
 app.use(fileUpload());
 app.use(cors({
+    origin: true,
     credentials: true
 }));
-
+app.use(express.static('public'));
 app.use(cookieParser());
 
 // app.post('/upload', async (req, res) => {
@@ -36,6 +38,7 @@ app.use(cookieParser());
 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
+    console.log(req)
     if (!token) {
         return res.json({ Error: "You are not Authenticated" })
     } else {
@@ -51,7 +54,7 @@ const verifyUser = (req, res, next) => {
     }
 }
 
-app.get('/', verifyUser, (req, res) => {
+app.get('/auth', verifyUser, (req, res) => {
     return res.json({ Status: "Success", name: req.name, id: req.id })
 })
 
@@ -116,21 +119,33 @@ app.get('/logout', (req, res) => {
     return res.json({ Status: "Success" });
 })
 
+// app.get('/delete', (req, res) => {
+//     console.log("HI")
+//     res.send("Hi")
+// })
 
 // ===============================================
 app.post('/delete', async (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
+    // /res.send("Hi")
+    // const client = new S3Client({
+    //     region: process.env.AWS_REGION,
+    //     credentials: {
+    //         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    //         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    //     }
+    // });
     AWS.config.update({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION
+        region: 'us-east-2'
     })
 
-    console.log(req.body.keyFile)
-    // res.json({data: req.body})
-    const sql = "DELETE FROM rdscloudproject1.user_file_logs WHERE key_file = ?"
 
-    // 
+
+    console.log(req.body.keyFile)
+    // res.json({data: req.params.keyFile})
+    const sql = "DELETE FROM rdscloudproject1.user_file_logs WHERE key_file = ?"
 
     const s3 = new AWS.S3();
 
@@ -138,7 +153,7 @@ app.post('/delete', async (req, res) => {
         Bucket: 'hw2-web-cloud-storage',
         Key: req.body.keyFile
     }
-
+    // res.send(req.body.keyFile)
     s3.deleteObject(params, (err, data) => {
         if (err) {
             throw err;
@@ -155,6 +170,9 @@ app.post('/delete', async (req, res) => {
         })
 
     })
+    // const command = new DeleteBucketCommand(params);
+    // const response = await client.send(command);
+    // res.send(response);
 
     // const command = new DeleteBucketCommand(input);
     // const response = await client.send(command);
@@ -308,11 +326,11 @@ app.listen(PORT, () => {
     // });
     // db.connect()
 
-    // db.query('SELECT 1 + 1 AS solution', (err, rows, fields) => {
-    //     if (err) throw err
+    db.query('SELECT 1 + 1 AS solution', (err, rows, fields) => {
+        if (err) throw err
 
-    //     console.log('The solution is: ', rows[0].solution)
-    // })
+        console.log('The solution is: ', rows[0].solution)
+    })
 
     // db.query('SHOW TABLES;', (err, rows, fields) => {
     //     if (err) throw err

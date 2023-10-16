@@ -74,7 +74,7 @@ app.get('/', verifyUser, (req, res) => {
 })
 
 app.get('/test', (req, res) => {
-    res.send("Hi")
+    res.send("Hi--")
 });
 
 
