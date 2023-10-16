@@ -57,12 +57,6 @@ const DeleteFile = () => {
                 auth ?
                     <div>
                         <NavigationBar userName={name} userID={id} />
-                        {/* <div style={{ display: 'flex' }}>
-                            <h1>Logged In as: {name} - {id}</h1>
-                           
-
-                        </div> */}
-
 
                         <div className="container mt-5">
                             <h2>Delete File From S3 Bucket</h2>

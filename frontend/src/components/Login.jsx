@@ -7,14 +7,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const { Title } = Typography;
 const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
-
+// const baseURL =  "http://localhost:5000"
 const Login = () => {
 
     const navigate = useNavigate();
-
-    // const onFinish = (values) => {
-    //     console.log('Received values:', values);
-    // };
 
     const [values, setValues] = useState({
         username: '',
@@ -29,7 +25,7 @@ const Login = () => {
         axios.post(`${baseURL}/login`, values)
             .then(res => {
                 if (res.data.Status === "Success") {
-                   
+                    console.log(res.data.Token)
                     localStorage.setItem('token', res.data.Token)
                     navigate('/')
                 } else {

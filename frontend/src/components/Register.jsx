@@ -10,9 +10,6 @@ const { Title } = Typography;
 const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
 
 function Register() {
-    // const onFinish = (values) => {
-    //     console.log('Received values:', values);
-    // };
 
     const navigate = useNavigate();
 

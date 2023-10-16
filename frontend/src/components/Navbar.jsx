@@ -4,6 +4,11 @@ const NavigationBar = (props) => {
     // eslint-disable-next-line react/prop-types
     const { userName, userID } = props;
 
+    const clearLocalStorage = () => {
+        localStorage.clear();
+        location.reload();
+    };
+
     return (
         <Navbar bg="dark" variant="dark" expand="lg">
             <Navbar.Brand href="/">Logged In As: {userName} - ID:{userID}</Navbar.Brand>
@@ -16,6 +21,7 @@ const NavigationBar = (props) => {
                     <Nav.Link href="/delete">Delete File</Nav.Link>
                     <Nav.Link href="/update">Update File</Nav.Link>
                     <Nav.Link href="/download">Download File</Nav.Link>
+                    <Nav.Link onClick={clearLocalStorage}>Logout</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
            

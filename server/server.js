@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import mysql from 'mysql';
 import fileUpload from 'express-fileupload';
 import AWS from 'aws-sdk';
-import { S3Client, DeleteBucketCommand } from '@aws-sdk/client-s3';
 import 'dotenv/config';
 
 const PORT = 5000;
@@ -21,6 +20,14 @@ const db = mysql.createConnection({
     database: process.env.DB_DATABASE
 })
 
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', 'http://frontend.harshilvyas.com');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
+
 app.use(express.json());
 app.use(fileUpload());
 app.use(cors({
@@ -29,12 +36,6 @@ app.use(cors({
 }));
 app.use(express.static('public'));
 app.use(cookieParser());
-
-// app.post('/upload', async (req, res) => {
-//     const fileContent = Buffer.from(req.file.data.image, 'binary');
-//     console.log(fileContent)
-//     console.log(req.data)
-// });
 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
@@ -59,7 +60,7 @@ app.get('/auth', verifyUser, (req, res) => {
 })
 
 app.get('/test', (req, res) => {
-    res.json({Message: "Hello World!! - Cloud" })
+    res.json({ Message: "Hello World!! - Cloud" })
 })
 
 app.post('/register', (req, res) => {
@@ -76,17 +77,13 @@ app.post('/register', (req, res) => {
             req.body.lastName,
             hash
         ]
-        // console.log(req.body.lastName)
 
         db.query(sql, [values], (err, result) => {
             if (err) return res.json({ Error: err });
             return res.json({ Status: "Success" });
         });
 
-        // const res = await pool.query(sql, values)
-
     });
-    // console.log(req.body.username);
 })
 
 app.post('/login', (req, res) => {
@@ -103,7 +100,7 @@ app.post('/login', (req, res) => {
                     const name = data[0].user_name;
                     const token = jwt.sign({ name, id }, "jwt-secret-token", { expiresIn: '1d' });
                     res.cookie('token', token)
-                    return res.json({ Status: "Success" });
+                    return res.json({ Status: "Success", Token: token });
                 } else {
                     return res.json({ Error: "Password not matched" });
                 }
@@ -114,37 +111,16 @@ app.post('/login', (req, res) => {
     })
 });
 
-app.get('/logout', (req, res) => {
-    res.clearCookie('token');
-    return res.json({ Status: "Success" });
-})
-
-// app.get('/delete', (req, res) => {
-//     console.log("HI")
-//     res.send("Hi")
-// })
-
-// ===============================================
 app.post('/delete', async (req, res) => {
-    // console.log(req.body)
-    // /res.send("Hi")
-    // const client = new S3Client({
-    //     region: process.env.AWS_REGION,
-    //     credentials: {
-    //         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    //         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    //     }
-    // });
+
     AWS.config.update({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         region: 'us-east-2'
     })
 
-
-
     console.log(req.body.keyFile)
-    // res.json({data: req.params.keyFile})
+
     const sql = "DELETE FROM rdscloudproject1.user_file_logs WHERE key_file = ?"
 
     const s3 = new AWS.S3();
@@ -153,7 +129,7 @@ app.post('/delete', async (req, res) => {
         Bucket: 'hw2-web-cloud-storage',
         Key: req.body.keyFile
     }
-    // res.send(req.body.keyFile)
+
     s3.deleteObject(params, (err, data) => {
         if (err) {
             throw err;
@@ -170,14 +146,6 @@ app.post('/delete', async (req, res) => {
         })
 
     })
-    // const command = new DeleteBucketCommand(params);
-    // const response = await client.send(command);
-    // res.send(response);
-
-    // const command = new DeleteBucketCommand(input);
-    // const response = await client.send(command);
-
-
 
 })
 
@@ -205,8 +173,6 @@ app.post('/upload', async (req, res) => {
     console.log(req.files.file.name)
     console.log(values)
     console.log(req.body)
-    // return res.json(req.body)
-
 
     const s3 = new AWS.S3({
         useAccelerateEndpoint: true
@@ -252,16 +218,6 @@ app.post('/update', (req, res) => {
 
     const sql = `UPDATE rdscloudproject1.user_file_logs SET updated_at = CURRENT_TIMESTAMP, description = '${req.body.desc}', user_id = '${req.body.userID}' WHERE key_file = '${req.files.file.name}'`;
 
-    // const values = [
-    //     req.body.desc,
-    //     req.body.userID,
-    //     req.files.file.name,
-    // ]
-    // // console.log(req.files.file.name)
-    // console.log(values)
-    // // console.log(req.body)
-    // return res.json(req.body)
-
     const s3 = new AWS.S3();
 
     const fileContent = Buffer.from(req.files.file.data, 'binary');
@@ -273,10 +229,10 @@ app.post('/update', (req, res) => {
     console.log(sql_check_exists);
     db.query(sql_check_exists, (err, result) => {
         if (err) return res.json({ Error: `Unable to Update Entry as ${req.files.file.name} does not exist` })
-        
+
         if (result.length == 0)
-            return res.json({Status: `Unable to Update Entry as ${req.files.file.name} does not exist \n Please Go An Upload A file with ${req.files.file.name} first!!!!` })
-        
+            return res.json({ Status: `Unable to Update Entry as ${req.files.file.name} does not exist \n Please Go An Upload A file with ${req.files.file.name} first!!!!` })
+
 
         s3.upload(params, (err, data) => {
             if (err) {
@@ -286,7 +242,6 @@ app.post('/update', (req, res) => {
             db.query(sql, (err, result) => {
                 if (err) return res.json({ Error: "Failed to Update Data Entry into Database" })
             })
-            // console.log(sql)
 
             res.send({
                 "response_code": 200,
@@ -312,31 +267,5 @@ app.get('/getlogs', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Running on Port: ${PORT}`)
     console.log(new Date())
-
-    console.log(process.env.DB_HOST)
-    // bcrypt.hash('admin', 10, function(err, hash) {
-    //     if (err) { throw (err); }
-    //     console.log(hash)
-
-
-    // });
-    // bcrypt.compare('admin', "$2b$10$euDMRU6e.D/EqCUv9.lCQeZfRTznGyDcGR12HLYReWAW1EJ4FMrBS", function(err, result) {
-    //     if (err) { throw (err); }
-    //     console.log(result);
-    // });
-    // db.connect()
-
-    db.query('SELECT 1 + 1 AS solution', (err, rows, fields) => {
-        if (err) throw err
-
-        console.log('The solution is: ', rows[0].solution)
-    })
-
-    // db.query('SHOW TABLES;', (err, rows, fields) => {
-    //     if (err) throw err
-
-    //     console.log('The solution is: ', rows)
-    // })
-
 
 });

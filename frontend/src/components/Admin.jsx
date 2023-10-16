@@ -18,12 +18,12 @@ const AdminPage = () => {
         // Fetch user data from your API endpoint
         axios.get(`${baseURL}/getlogs`)
             .then((response) => {
-                if (response.data.Error != undefined){
+                if (response.data.Error != undefined) {
                     // console.log(response.data.Error)
-                    
+
                     alert(response.data.Error)
                 }
-                
+
                 console.log(response.data.data)
                 setUserData(response.data.data);
             })
@@ -76,6 +76,7 @@ const AdminPage = () => {
                                     <tr>
                                         <th>User ID</th>
                                         <th>User Name</th>
+                                        <th>Full Name</th>
                                         <th>Created At</th>
                                         <th>Updated At</th>
                                         <th>File Name / KEY</th>
@@ -88,17 +89,20 @@ const AdminPage = () => {
                                         <tr key={index}>
                                             <td>{user.id}</td>
                                             <td>{user.user_name}</td>
-                                            <td>{new Date(user.created_at).toUTCString()}</td>
-                                            <td>{new Date(user.updated_at).toUTCString()}</td>
+                                            <td>{user.first_name} {user.last_name}</td>
+                                            <td>{new Date(user.created_at).toLocaleString()}</td>
+                                            <td>{new Date(user.updated_at).toLocaleString()}</td>
                                             <td>{user.key_file}</td>
                                             <td>{user.description}</td>
                                             <td>
-                                                <Button
-                                                    variant="danger"
-                                                    onClick={() => handleDeleteFile(user.key_file)}
-                                                >
-                                                    Delete
-                                                </Button>
+                                                <center>
+                                                    <Button
+                                                        variant="danger"
+                                                        onClick={() => handleDeleteFile(user.key_file)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </center>
                                             </td>
                                         </tr>
                                     ))}

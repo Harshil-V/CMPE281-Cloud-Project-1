@@ -29,7 +29,7 @@ const DownloadFile = () => {
             .then(res => {
                 if (res.data.Status === "Success") {
                     setFileURL(res.data.url)
-                    // console.log(res.data)
+                    console.log(res.data.url)
 
                     // window.open(`https://${fileURL}`);
 

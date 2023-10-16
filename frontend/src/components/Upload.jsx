@@ -5,7 +5,7 @@ import NavigationBar from './Navbar'
 import jwt_decode from 'jwt-decode';
 
 const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
-
+// const baseURL =  "http://localhost:5000"
 const FileUpload = () => {
     const [file, setFile] = useState(null);
     const [description, setDescription] = useState('');

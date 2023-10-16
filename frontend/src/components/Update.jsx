@@ -64,14 +64,6 @@ const UpdateFile = () => {
         }
     }, [])
 
-    // const handleDelete = () => {
-    //     axios.get("http://localhost:5000/logout")
-    //     .then(() => {
-    //         location.reload(true);
-    //     })
-    //     .catch(err => console.log(err));
-    // }
-
     return (
         <>
             {
