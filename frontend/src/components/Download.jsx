@@ -89,7 +89,7 @@ const DownloadFile = () => {
                                                 Request File
                                             </Button>
                                             <Button style={{ marginLeft: 4 }} className='mt-3' variant="secondary" href={`https://${fileURL}`} download>
-                                                Donwload File
+                                                Download File
                                             </Button>
 
                                         </>

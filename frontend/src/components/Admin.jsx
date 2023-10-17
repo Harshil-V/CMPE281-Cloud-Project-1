@@ -5,7 +5,7 @@ import { Button, Table } from 'react-bootstrap';
 import jwt_decode from 'jwt-decode';
 
 const baseURL = "http://cloud1-loadbalancer-1926241129.us-east-2.elb.amazonaws.com";
-// const baseURL = "http://localhost:5000";
+
 const AdminPage = () => {
     const [auth, setAuth] = useState(false);
     const [message, setMessage] = useState("")
@@ -15,16 +15,14 @@ const AdminPage = () => {
 
     ]);
     useEffect(() => {
-        // Fetch user data from your API endpoint
+        
         axios.get(`${baseURL}/getlogs`)
             .then((response) => {
                 if (response.data.Error != undefined) {
-                    // console.log(response.data.Error)
 
                     alert(response.data.Error)
                 }
 
-                console.log(response.data.data)
                 setUserData(response.data.data);
             })
             .catch((error) => {
